@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en" data-lenis-prevent>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Friend Network</title>
+    
+    <!-- Clean fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="style.css">
+    <!-- Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.155.0/three.min.js"></script>
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- Lenis Smooth Scroll -->
+    <script src="https://cdn.jsdelivr.net/gh/studio-freight/lenis@1.0.19/bundled/lenis.min.js"></script>
+</head>
+<body data-lenis-prevent>
+    <!-- Three.js canvas -->
+    <canvas id="threejs-bg" style="position: fixed; top: 0; left: 0; z-index: -1;"></canvas>
+    
+    <!-- Loading Screen -->
+    <div id="loadingScreen" class="loading-screen">
+        <div class="loader"></div>
+        <div class="loading-text">Loading...</div>
+    </div>
+    
+    <!-- Main App -->
+    <div class="container" id="mainApp" style="display: none;">
+        <!-- Header -->
+        <header class="header">
+            <h1>Friend Network</h1>
+            <p class="subtitle">Discover meaningful connections</p>
+        </header>
+        
+        <!-- User Selection -->
+        <section class="card" data-animate>
+            <div class="card-header">
+                <div class="icon">👤</div>
+                <h3>Select User</h3>
+            </div>
+            <div class="form-group">
+                <select id="userDropdown" class="input"></select>
+                <button id="suggestBtn" class="btn primary">
+                    Suggest Friends
+                </button>
+            </div>
+        </section>
+        
+        <!-- Add User -->
+        <section class="card" data-animate>
+            <div class="card-header">
+                <div class="icon">✨</div>
+                <h3>Add User</h3>
+            </div>
+            <div class="form-group">
+                <input type="text" id="newUserInput" placeholder="Enter username" class="input">
+                <button id="addUserBtn" class="btn secondary">
+                    Add User
+                </button>
+            </div>
+        </section>
+        
+        <!-- Add Friendship -->
+        <section class="card" data-animate>
+            <div class="card-header">
+                <div class="icon">🔗</div>
+                <h3>Create Connection</h3>
+            </div>
+            <div class="form-group">
+                <div class="dual-input">
+                    <input type="text" id="friend1Input" placeholder="First user" class="input">
+                    <div class="connector"></div>
+                    <input type="text" id="friend2Input" placeholder="Second user" class="input">
+                </div>
+                <button id="addFriendshipBtn" class="btn secondary">
+                    Connect Users
+                </button>
+            </div>
+        </section>
+        
+        <!-- Results -->
+        <section class="card result-card" data-animate>
+            <div class="card-header">
+                <div class="icon">🧠</div>
+                <h3>Results</h3>
+            </div>
+            <div class="result-container">
+                <pre id="resultArea" class="result-area"></pre>
+            </div>
+        </section>
+    </div>
+    
+    <script src="app-simple.js"></script>
+</body>
+</html>
