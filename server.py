@@ -103,5 +103,4 @@ def serve_static(path):
     return send_from_directory('.', path)
 
 if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 3000))   # Railway ka port use karega
-    app.run(host="0.0.0.0", port=port, debug=True)
+    app.run(port=3000, debug=True) 
