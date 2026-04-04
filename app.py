@@ -3,13 +3,17 @@ import subprocess
 import os
 import hashlib
 import threading
+import platform   # ✅ added
 
 app = Flask(__name__, static_folder='.')
 
 BACKEND_DIR = os.path.join(os.getcwd(), 'backend')
 
-# ✅ CHANGE HERE (no .exe)
-MAIN_EXE = os.path.join(BACKEND_DIR, 'main')
+# ✅ OS-based executable selection
+if platform.system() == "Windows":
+    MAIN_EXE = os.path.abspath(os.path.join(BACKEND_DIR, 'main.exe'))
+else:
+    MAIN_EXE = os.path.join(BACKEND_DIR, 'main')
 
 INPUT_TXT = os.path.join(BACKEND_DIR, 'input.txt')
 OUTPUT_TXT = os.path.join(BACKEND_DIR, 'output.txt')
@@ -87,7 +91,8 @@ def run_backend():
             f.write(command + '\n')
 
     try:
-        subprocess.run(["./main"], cwd=BACKEND_DIR, check=True)
+        # ✅ FIXED: use MAIN_EXE
+        subprocess.run([MAIN_EXE], check=True)
     except Exception as e:
         return f'Error running backend: {e}', 500
 
@@ -124,7 +129,7 @@ def serve_static(path):
     return send_from_directory('.', path)
 
 
-# ✅ VERY IMPORTANT FOR DEPLOYMENT
+# ✅ deployment ready
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
