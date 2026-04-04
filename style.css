@@ -949,6 +949,20 @@ select.input {
     background: linear-gradient(135deg, var(--bg-card), rgba(99, 102, 241, 0.1));
 }
 
+.btn.danger {
+    background: linear-gradient(135deg, #dc2626, #b91c1c);
+    border-color: #dc2626;
+    color: white;
+}
+
+.btn.danger:hover {
+    background: linear-gradient(135deg, #b91c1c, #991b1b);
+    box-shadow: 
+        0 8px 30px rgba(220, 38, 38, 0.4),
+        0 0 30px rgba(220, 38, 38, 0.3);
+    transform: translateY(-4px) scale(1.05);
+}
+
 .btn:disabled {
     opacity: 0.6;
     cursor: not-allowed;
@@ -968,6 +982,17 @@ select.input {
 
 .btn:hover .btn-icon {
     transform: translateX(2px);
+}
+
+/* ========================= RESULT STYLES ========================= */
+.result-area.success {
+    color: #10b981;
+    border-color: #10b981;
+}
+
+.result-area.error {
+    color: #ef4444;
+    border-color: #ef4444;
 }
 
 /* ========================= DUAL INPUT ========================= */

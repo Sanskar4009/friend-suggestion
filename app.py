@@ -81,8 +81,10 @@ def login():
     return 'User not found.', 400
 
 
-@app.route('/run-backend', methods=['POST'])
+@app.route('/run-backend', methods=['GET', 'POST'])
 def run_backend():
+    if request.method == 'GET':
+        return jsonify({"success": False, "message": "GET method not allowed"}), 405
     data = request.get_json()
     command = data.get('command', '')
 
@@ -92,18 +94,40 @@ def run_backend():
 
     try:
         # ✅ FIXED: use MAIN_EXE
-        subprocess.run([MAIN_EXE], check=True)
+        subprocess.run([MAIN_EXE], check=True, cwd=BACKEND_DIR)
     except Exception as e:
-        return f'Error running backend: {e}', 500
+        return jsonify({"success": False, "message": f"Error running backend: {e}"}), 500
 
     try:
         with file_lock:
             with open(OUTPUT_TXT, 'r') as f:
-                result = f.read()
+                result = f.read().strip()
     except Exception as e:
-        result = f'Error reading output: {e}'
+        return jsonify({"success": False, "message": f"Error reading output: {e}"}), 500
 
-    return result
+    # Parse the result and return structured JSON
+    if result.startswith('User added:'):
+        user = result.split(': ', 1)[1]
+        return jsonify({"success": True, "message": f"User {user} added successfully"})
+    elif result == 'User already exists.':
+        return jsonify({"success": False, "message": "User already exists"})
+    elif result.startswith('Friendship added:'):
+        connection = result.split(': ', 1)[1]
+        return jsonify({"success": True, "message": f"Connection created: {connection}"})
+    elif result == 'Friendship already exists.':
+        return jsonify({"success": False, "message": "Connection already exists"})
+    elif result == 'One or both users do not exist.':
+        return jsonify({"success": False, "message": "One or both users do not exist"})
+    elif result == 'Cannot connect user to themselves.':
+        return jsonify({"success": False, "message": "Cannot connect user to themselves"})
+    elif result.startswith('Friend suggestions for'):
+        return jsonify({"success": True, "message": result})
+    elif result == 'No suggestions.':
+        return jsonify({"success": True, "message": "No friend suggestions available"})
+    elif result == 'Unknown command.':
+        return jsonify({"success": False, "message": "Unknown command"})
+    else:
+        return jsonify({"success": False, "message": result})
 
 
 @app.route('/users', methods=['GET'])
@@ -117,6 +141,19 @@ def get_users():
             pass
 
     return jsonify(users)
+
+
+@app.route('/clear', methods=['POST'])
+def clear_data():
+    try:
+        with file_lock:
+            # Clear all data files
+            open(USERS_TXT, 'w').close()
+            open(PASSWORDS_TXT, 'w').close()
+            open(os.path.join(BACKEND_DIR, 'friendships.txt'), 'w').close()
+        return jsonify({"success": True, "message": "Data cleared successfully"})
+    except Exception as e:
+        return jsonify({"success": False, "message": f"Error clearing data: {e}"}), 500
 
 
 @app.route('/')

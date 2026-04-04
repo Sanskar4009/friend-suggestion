@@ -52,6 +52,10 @@ void add_user(const string& user, ostream& out) {
 }
 
 void add_friendship(const string& u, const string& v, ostream& out) {
+    if (u == v) {
+        out << "Cannot connect user to themselves." << endl;
+        return;
+    }
     if (!adjList.count(u) || !adjList.count(v)) {
         out << "One or both users do not exist." << endl;
         return;
@@ -120,5 +124,6 @@ int main() {
     while (getline(fin, line)) {
         if (!line.empty()) process_command(line, fout);
     }
+    fout.close();
     return 0;
 } 

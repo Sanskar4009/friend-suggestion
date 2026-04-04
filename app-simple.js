@@ -178,6 +178,12 @@ function initializeInteractions() {
     if (suggestBtn) {
         suggestBtn.addEventListener('click', handleSuggestFriends);
     }
+
+    // Clear data functionality
+    const clearBtn = document.getElementById('clearBtn');
+    if (clearBtn) {
+        clearBtn.addEventListener('click', handleClearData);
+    }
     
     updateUserDropdown();
 }
@@ -194,6 +200,7 @@ async function handleAddUser() {
     
     const resultArea = document.getElementById('resultArea');
     resultArea.textContent = 'Adding user...';
+    resultArea.className = '';
     
     try {
         const response = await fetch('/run-backend', {
@@ -202,22 +209,27 @@ async function handleAddUser() {
             body: JSON.stringify({ command: `add_user ${username}` })
         });
         
-        const result = await response.text();
-        resultArea.textContent = result;
-        input.value = '';
-        updateUserDropdown();
+        const data = await response.json();
+        resultArea.textContent = data.message;
+        resultArea.className = data.success ? 'success' : 'error';
         
-        // Trigger confetti if available
-        if (typeof confetti !== 'undefined') {
-            confetti({
-                particleCount: 50,
-                spread: 70,
-                origin: { y: 0.6 }
-            });
+        if (data.success) {
+            input.value = '';
+            updateUserDropdown();
+            
+            // Trigger confetti if available
+            if (typeof confetti !== 'undefined') {
+                confetti({
+                    particleCount: 50,
+                    spread: 70,
+                    origin: { y: 0.6 }
+                });
+            }
         }
         
     } catch (error) {
         resultArea.textContent = 'Error: ' + error.message;
+        resultArea.className = 'error';
         console.error(error);
     }
 }
@@ -235,6 +247,7 @@ async function handleAddFriendship() {
     
     const resultArea = document.getElementById('resultArea');
     resultArea.textContent = 'Creating connection...';
+    resultArea.className = '';
     
     try {
         const response = await fetch('/run-backend', {
@@ -243,23 +256,28 @@ async function handleAddFriendship() {
             body: JSON.stringify({ command: `add_friendship ${user1} ${user2}` })
         });
         
-        const result = await response.text();
-        resultArea.textContent = result;
-        input1.value = '';
-        input2.value = '';
-        updateUserDropdown();
+        const data = await response.json();
+        resultArea.textContent = data.message;
+        resultArea.className = data.success ? 'success' : 'error';
         
-        // Trigger confetti if available
-        if (typeof confetti !== 'undefined') {
-            confetti({
-                particleCount: 80,
-                spread: 60,
-                colors: ['#ff6b6b', '#6366f1']
-            });
+        if (data.success) {
+            input1.value = '';
+            input2.value = '';
+            updateUserDropdown();
+            
+            // Trigger confetti if available
+            if (typeof confetti !== 'undefined') {
+                confetti({
+                    particleCount: 80,
+                    spread: 60,
+                    colors: ['#ff6b6b', '#6366f1']
+                });
+            }
         }
         
     } catch (error) {
         resultArea.textContent = 'Error: ' + error.message;
+        resultArea.className = 'error';
         console.error(error);
     }
 }
@@ -275,6 +293,7 @@ async function handleSuggestFriends() {
     
     const resultArea = document.getElementById('resultArea');
     resultArea.textContent = 'AI is thinking...';
+    resultArea.className = '';
     
     try {
         const response = await fetch('/run-backend', {
@@ -283,20 +302,55 @@ async function handleSuggestFriends() {
             body: JSON.stringify({ command: `suggest ${username}` })
         });
         
-        const result = await response.text();
-        resultArea.textContent = result;
+        const data = await response.json();
+        resultArea.textContent = data.message;
+        resultArea.className = data.success ? 'success' : 'error';
         
-        // Trigger celebration confetti
-        if (typeof confetti !== 'undefined') {
-            confetti({
-                particleCount: 100,
-                spread: 70,
-                origin: { y: 0.6 }
-            });
+        if (data.success) {
+            // Trigger celebration confetti
+            if (typeof confetti !== 'undefined') {
+                confetti({
+                    particleCount: 100,
+                    spread: 70,
+                    origin: { y: 0.6 }
+                });
+            }
         }
         
     } catch (error) {
         resultArea.textContent = 'Error: ' + error.message;
+        resultArea.className = 'error';
+        console.error(error);
+    }
+}
+
+async function handleClearData() {
+    if (!confirm('Are you sure you want to clear all users and connections? This action cannot be undone.')) {
+        return;
+    }
+    
+    const resultArea = document.getElementById('resultArea');
+    resultArea.textContent = 'Clearing data...';
+    resultArea.className = '';
+    
+    try {
+        const response = await fetch('/clear', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        });
+        
+        const data = await response.json();
+        resultArea.textContent = data.message;
+        resultArea.className = data.success ? 'success' : 'error';
+        
+        if (data.success) {
+            // Update the user dropdown after clearing
+            updateUserDropdown();
+        }
+        
+    } catch (error) {
+        resultArea.textContent = 'Error: ' + error.message;
+        resultArea.className = 'error';
         console.error(error);
     }
 }
