@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Account - Social Media Friend Suggestion</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="gradient-bg"></div>
+    <div class="container" id="registerContainer">
+        <h1>Create Account</h1>
+        <div class="section">
+            <input type="text" id="registerUserInput" placeholder="Choose a username">
+            <input type="password" id="registerPasswordInput" placeholder="Choose a password">
+            <input type="password" id="registerPasswordConfirmInput" placeholder="Confirm password">
+            <button id="registerBtn">Create Account</button>
+            <a href="index.html"><button class="secondary" id="showLoginBtn">Back to Login</button></a>
+            <div id="registerError" class="error"></div>
+        </div>
+    </div>
+    <script src="app.js"></script>
+    <script>
+    // Only show registration logic
+    document.getElementById('registerBtn').onclick = async function handleRegister() {
+        const username = document.getElementById('registerUserInput').value.trim();
+        const password = document.getElementById('registerPasswordInput').value;
+        const confirm = document.getElementById('registerPasswordConfirmInput').value;
+        const errorDiv = document.getElementById('registerError');
+        if (!username || !password || !confirm) {
+            errorDiv.textContent = 'Please fill all fields.';
+            return;
+        }
+        if (password !== confirm) {
+            errorDiv.textContent = 'Passwords do not match.';
+            return;
+        }
+        // Check if username exists
+        const res = await fetch('/users');
+        const users = await res.json();
+        if (users.includes(username)) {
+            errorDiv.textContent = 'Username already exists.';
+            return;
+        }
+        // Register via backend
+        const regRes = await fetch('/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })
+        });
+        const regText = await regRes.text();
+        if (regRes.ok) {
+            errorDiv.textContent = '';
+            alert('Account created! You can now log in.');
+            window.location.href = 'index.html';
+        } else {
+            errorDiv.textContent = regText;
+        }
+    };
+    </script>
+</body>
+</html> 

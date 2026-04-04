@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug - Friend Network</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #000;
+            color: #fff;
+            font-family: Arial, sans-serif;
+        }
+        #status {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.8);
+            padding: 10px;
+            border-radius: 5px;
+            z-index: 1000;
+        }
+        #threejs-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: -1;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 50px 20px;
+        }
+        .card {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+        }
+        .btn {
+            background: #6366f1;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .input {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            padding: 10px;
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 5px;
+            margin: 5px;
+            width: 200px;
+        }
+    </style>
+</head>
+<body>
+    <div id="status">Loading...</div>
+    <canvas id="threejs-bg"></canvas>
+    
+    <div class="container">
+        <h1>Friend Network - Debug Version</h1>
+        
+        <div class="card">
+            <h3>Add User</h3>
+            <input type="text" id="newUserInput" placeholder="Enter username" class="input">
+            <button id="addUserBtn" class="btn">Add User</button>
+        </div>
+        
+        <div class="card">
+            <h3>Results</h3>
+            <pre id="resultArea" style="background: rgba(0,0,0,0.5); padding: 10px; border-radius: 5px;"></pre>
+        </div>
+    </div>
+
+    <!-- Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.155.0/three.min.js"></script>
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    
+    <script>
+        console.log('Starting debug version...');
+        
+        const status = document.getElementById('status');
+        
+        function updateStatus(message) {
+            status.textContent = message;
+            console.log(message);
+        }
+        
+        // Check if libraries loaded
+        updateStatus('Checking libraries...');
+        
+        if (typeof THREE === 'undefined') {
+            updateStatus('ERROR: Three.js not loaded');
+        } else {
+            updateStatus('Three.js loaded ✓');
+        }
+        
+        if (typeof confetti === 'undefined') {
+            updateStatus('WARNING: Confetti not loaded');
+        } else {
+            updateStatus('Confetti loaded ✓');
+        }
+        
+        // Simple Three.js setup
+        let scene, camera, renderer;
+        
+        function initSimpleThree() {
+            try {
+                updateStatus('Initializing Three.js...');
+                
+                scene = new THREE.Scene();
+                camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+                
+                const canvas = document.getElementById('threejs-bg');
+                renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true });
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                
+                // Add a simple cube
+                const geometry = new THREE.BoxGeometry();
+                const material = new THREE.MeshBasicMaterial({ color: 0x6366f1, wireframe: true });
+                const cube = new THREE.Mesh(geometry, material);
+                scene.add(cube);
+                
+                camera.position.z = 5;
+                
+                function animate() {
+                    requestAnimationFrame(animate);
+                    cube.rotation.x += 0.01;
+                    cube.rotation.y += 0.01;
+                    renderer.render(scene, camera);
+                }
+                
+                animate();
+                updateStatus('Three.js working! 🎉');
+                
+                // Test confetti
+                setTimeout(() => {
+                    if (typeof confetti !== 'undefined') {
+                        confetti();
+                        updateStatus('All systems working! 🎊');
+                    }
+                }, 2000);
+                
+            } catch (error) {
+                updateStatus('Three.js error: ' + error.message);
+                console.error(error);
+            }
+        }
+        
+        // Simple button functionality
+        document.getElementById('addUserBtn').addEventListener('click', async () => {
+            const input = document.getElementById('newUserInput');
+            const resultArea = document.getElementById('resultArea');
+            const username = input.value.trim();
+            
+            if (!username) {
+                resultArea.textContent = 'Please enter a username';
+                return;
+            }
+            
+            try {
+                const response = await fetch('/run-backend', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ command: `add_user ${username}` })
+                });
+                
+                const result = await response.text();
+                resultArea.textContent = result;
+                input.value = '';
+                
+                // Trigger confetti on success
+                if (typeof confetti !== 'undefined') {
+                    confetti({
+                        particleCount: 100,
+                        spread: 70,
+                        origin: { y: 0.6 }
+                    });
+                }
+                
+            } catch (error) {
+                resultArea.textContent = 'Error: ' + error.message;
+            }
+        });
+        
+        // Start when DOM is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            updateStatus('DOM ready, starting...');
+            initSimpleThree();
+        });
+        
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            if (camera && renderer) {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            }
+        });
+    </script>
+</body>
+</html>
